@@ -1,21 +1,32 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../services/auth";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      alert("Lütfen e-posta ve şifre girin.");
+
+    if (!username.trim() || !password.trim()) {
+      alert("Lütfen kullanıcı adı ve şifre girin.");
       return;
     }
-    // Geçici sahte giriş
-    console.log("Giriş başarılı:", email);
-    navigate("/dashboard");
+
+    try {
+      const res = await login({ username, password });
+      const token = res.data.token; // backend’in döndürdüğü token anahtarı
+      localStorage.setItem("token", token);
+      alert("Giriş başarılı!");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err.response?.data);
+      const msg = err.response?.data?.title || err.message;
+      alert("Giriş başarısız: " + msg);
+    }
   };
 
   return (
@@ -24,14 +35,14 @@ export default function Login() {
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Giriş Yap</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-gray-700 mb-1">E-posta</label>
+            <label className="block text-gray-700 mb-1">Kullanıcı Adı</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="you@example.com"
+              placeholder="username"
             />
           </div>
           <div>
@@ -56,7 +67,7 @@ export default function Login() {
           Hesabın yok mu?{" "}
           <button
             onClick={() => navigate("/register")}
-            className="text-blue-600 hover:underline"
+            className="text-green-600 hover:underline"
           >
             Kayıt Ol
           </button>
