@@ -5,12 +5,13 @@ import {
   Search,
   Plus,
   Eye,
+  Trash2,            // ← ekledik
   MoreVertical,
   TrendingUp,
   Calendar,
   Bell
 } from "lucide-react";
-import { getTopics } from "../services/topics";
+import { getTopics, deleteTopic } from "../services/topics"; // ← deleteTopic’i de import ettik
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -29,6 +30,18 @@ export default function Dashboard() {
 
   const goToDetail  = (id) => navigate(`/topics/${id}`);
   const addNewTopic = ()   => navigate("/topics/new");
+
+  // “Sil” işlemi
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bu konuyu silmek istediğine emin misin?")) return;
+    try {
+      await deleteTopic(id);
+      setTopics(prev => prev.filter(t => t.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Silme başarısız: " + (err.response?.data?.title || err.message));
+    }
+  };
 
   const getStatusColor = (s) => ({
     Aktif:      "bg-green-100 text-green-800",
@@ -78,7 +91,7 @@ export default function Dashboard() {
                   <p className="text-2xl font-bold">{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
-                  <stat.icon className="h-6 w-6 text-white"/>
+                  <stat.icon className="h-6 w-6 text-white" />
                 </div>
               </div>
             </div>
@@ -92,7 +105,7 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold">Konular Listesi</h2>
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"/>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
                   placeholder="Konu ara..."
@@ -115,7 +128,7 @@ export default function Dashboard() {
                 onClick={addNewTopic}
                 className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition shadow"
               >
-                <Plus className="h-4 w-4"/> <span>Yeni Konu</span>
+                <Plus className="h-4 w-4" /> <span>Yeni Konu</span>
               </button>
             </div>
           </div>
@@ -125,8 +138,8 @@ export default function Dashboard() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3"><input type="checkbox" className="rounded"/></th>
-                  {["No","Başlık","Durum","Öncelik","İşlemler"].map((h) => (
+                  <th className="px-6 py-3"><input type="checkbox" className="rounded" /></th>
+                  {["No", "Başlık", "Durum", "Öncelik", "İşlemler"].map((h) => (
                     <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
@@ -134,7 +147,7 @@ export default function Dashboard() {
               <tbody className="bg-white divide-y">
                 {filteredTopics.map((topic) => (
                   <tr key={topic.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4"><input type="checkbox" className="rounded"/></td>
+                    <td className="px-6 py-4"><input type="checkbox" className="rounded" /></td>
                     <td className="px-6 py-4">#{topic.id}</td>
                     <td className="px-6 py-4 font-medium">{topic.title}</td>
                     <td className="px-6 py-4">
@@ -153,10 +166,17 @@ export default function Dashboard() {
                         className="text-blue-600 hover:bg-blue-50 p-1 rounded transition"
                         title="Detayları Görüntüle"
                       >
-                        <Eye className="h-4 w-4"/>
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(topic.id)}
+                        className="text-red-600 hover:bg-red-50 p-1 rounded transition"
+                        title="Sil"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                       <button className="text-gray-400 hover:bg-gray-50 p-1 rounded transition" title="Diğer İşlemler">
-                        <MoreVertical className="h-4 w-4"/>
+                        <MoreVertical className="h-4 w-4" />
                       </button>
                     </td>
                   </tr>
