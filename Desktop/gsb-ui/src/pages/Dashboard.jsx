@@ -1,18 +1,34 @@
-import React, { useState } from "react";
+// src/pages/Dashboard.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search, Plus, Eye, MoreVertical,
-  TrendingUp, Calendar, Bell
+  Search,
+  Plus,
+  Eye,
+  MoreVertical,
+  TrendingUp,
+  Calendar,
+  Bell
 } from "lucide-react";
-import { mockTopics } from "../data/mockTopics";
+import { getTopics } from "../services/topics";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [topics, setTopics]             = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [searchTerm, setSearchTerm]     = useState("");
   const [selectedFilter, setSelectedFilter] = useState("Tümü");
 
+  useEffect(() => {
+    setLoading(true);
+    getTopics()
+      .then(res => setTopics(res.data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
   const goToDetail  = (id) => navigate(`/topics/${id}`);
-  const addNewTopic = () => navigate("/topics/new");
+  const addNewTopic = ()   => navigate("/topics/new");
 
   const getStatusColor = (s) => ({
     Aktif:      "bg-green-100 text-green-800",
@@ -20,17 +36,21 @@ export default function Dashboard() {
     Tamamlandı: "bg-blue-100 text-blue-800",
   }[s] || "bg-gray-100 text-gray-800");
 
-  const filteredTopics = mockTopics.filter((t) => {
+  const filteredTopics = topics.filter((t) => {
     const matchSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchFilter = selectedFilter === "Tümü" || t.status === selectedFilter;
     return matchSearch && matchFilter;
   });
 
   const stats = [
-    { label: "Toplam Konu",   value: "156", icon: TrendingUp, color: "from-blue-500 to-purple-600" },
-    { label: "Aktif Konular", value: "48",  icon: Calendar,   color: "from-green-500 to-teal-600" },
-    { label: "Bekleyen",      value: "12",  icon: Bell,       color: "from-yellow-500 to-orange-600" },
+    { label: "Toplam Konu",   value: topics.length.toString(), icon: TrendingUp, color: "from-blue-500 to-purple-600" },
+    { label: "Aktif Konular", value: topics.filter(t => t.status==="Aktif").length.toString(), icon: Calendar, color: "from-green-500 to-teal-600" },
+    { label: "Bekleyen",      value: topics.filter(t => t.status==="Beklemede").length.toString(), icon: Bell, color: "from-yellow-500 to-orange-600" },
   ];
+
+  if (loading) {
+    return <p className="p-4 text-center">Yükleniyor...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -39,7 +59,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <div className="flex items-center space-x-4">
-            <Bell className="h-6 w-6 text-gray-400 hover:text-gray-600 cursor-pointer"/>
+            <Bell className="h-6 w-6 text-gray-400 hover:text-gray-600 cursor-pointer" />
             <div className="h-8 w-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-semibold">JD</span>
             </div>
@@ -106,7 +126,7 @@ export default function Dashboard() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3"><input type="checkbox" className="rounded"/></th>
-                  {["No","Başlık","Kategori","Durum","Öncelik","İşlemler"].map((h) => (
+                  {["No","Başlık","Durum","Öncelik","İşlemler"].map((h) => (
                     <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
@@ -119,7 +139,7 @@ export default function Dashboard() {
                     <td className="px-6 py-4 font-medium">{topic.title}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 rounded-full ${getStatusColor(topic.status)}`}>
-                        {topic.category}
+                        {topic.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -135,13 +155,19 @@ export default function Dashboard() {
                       >
                         <Eye className="h-4 w-4"/>
                       </button>
-                      <button className="text-gray-400 hover:bg-gray-50 p-1 rounded transition"
-                              title="Diğer İşlemler">
+                      <button className="text-gray-400 hover:bg-gray-50 p-1 rounded transition" title="Diğer İşlemler">
                         <MoreVertical className="h-4 w-4"/>
                       </button>
                     </td>
                   </tr>
                 ))}
+                {filteredTopics.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="p-4 text-center text-gray-500">
+                      Kayıt bulunamadı.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

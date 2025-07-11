@@ -1,7 +1,7 @@
 // src/services/auth.js
 import axios from "axios";
 
-const API_URL = "https://localhost:7020/api/Auth";
+const API_URL = "http://localhost:5215/api/Auth";
 
 export const register = (payload) =>
   axios.post(`${API_URL}/register`, payload);
