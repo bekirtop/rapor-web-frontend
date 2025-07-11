@@ -5,13 +5,12 @@ import {
   Search,
   Plus,
   Eye,
-  Trash2,            // ← ekledik
+  Trash2,
   MoreVertical,
   TrendingUp,
-  Calendar,
-  Bell
+  Calendar
 } from "lucide-react";
-import { getTopics, deleteTopic } from "../services/topics"; // ← deleteTopic’i de import ettik
+import { getTopics, deleteTopic } from "../services/topics";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,6 +18,7 @@ export default function Dashboard() {
   const [loading, setLoading]           = useState(true);
   const [searchTerm, setSearchTerm]     = useState("");
   const [selectedFilter, setSelectedFilter] = useState("Tümü");
+  const [sortByPriority, setSortByPriority] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -31,7 +31,6 @@ export default function Dashboard() {
   const goToDetail  = (id) => navigate(`/topics/${id}`);
   const addNewTopic = ()   => navigate("/topics/new");
 
-  // “Sil” işlemi
   const handleDelete = async (id) => {
     if (!window.confirm("Bu konuyu silmek istediğine emin misin?")) return;
     try {
@@ -44,21 +43,26 @@ export default function Dashboard() {
   };
 
   const getStatusColor = (s) => ({
-    Aktif:      "bg-green-100 text-green-800",
-    Beklemede:  "bg-yellow-100 text-yellow-800",
-    Tamamlandı: "bg-blue-100 text-blue-800",
+    "Devam Ediyor": "bg-green-100 text-green-800",
+    "Beklemede":    "bg-yellow-100 text-yellow-800",
+    "Tamamlandı":   "bg-blue-100 text-blue-800",
   }[s] || "bg-gray-100 text-gray-800");
 
-  const filteredTopics = topics.filter((t) => {
-    const matchSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchFilter = selectedFilter === "Tümü" || t.status === selectedFilter;
-    return matchSearch && matchFilter;
-  });
+  // Filtre ve sıralama
+  let list = topics
+    .filter(t => 
+      (selectedFilter === "Tümü" || t.status === selectedFilter) &&
+      t.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  if (sortByPriority) {
+    list = [...list].sort((a,b) => b.priority - a.priority);
+  }
 
   const stats = [
     { label: "Toplam Konu",   value: topics.length.toString(), icon: TrendingUp, color: "from-blue-500 to-purple-600" },
-    { label: "Aktif Konular", value: topics.filter(t => t.status==="Aktif").length.toString(), icon: Calendar, color: "from-green-500 to-teal-600" },
-    { label: "Bekleyen",      value: topics.filter(t => t.status==="Beklemede").length.toString(), icon: Bell, color: "from-yellow-500 to-orange-600" },
+    { label: "Devam Eden",    value: topics.filter(t => t.status==="Devam Ediyor").length.toString(), icon: Calendar, color: "from-green-500 to-teal-600" },
+    { label: "Tamamlanan",    value: topics.filter(t => t.status==="Tamamlandı").length.toString(), icon: Calendar, color: "from-blue-300 to-blue-500" },
   ];
 
   if (loading) {
@@ -71,12 +75,6 @@ export default function Dashboard() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <Bell className="h-6 w-6 text-gray-400 hover:text-gray-600 cursor-pointer" />
-            <div className="h-8 w-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">JD</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -98,32 +96,41 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Main Table */}
+        {/* Table Section */}
         <div className="bg-white rounded-xl shadow border">
           {/* Table Header */}
           <div className="px-6 py-4 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
             <h2 className="text-xl font-semibold">Konular Listesi</h2>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
                   placeholder="Konu ara..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 w-64"
                 />
               </div>
               <select
                 value={selectedFilter}
-                onChange={(e) => setSelectedFilter(e.target.value)}
+                onChange={e => setSelectedFilter(e.target.value)}
                 className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                <option>Tümü</option>
-                <option>Aktif</option>
-                <option>Beklemede</option>
-                <option>Tamamlandı</option>
+                <option value="Tümü">Tümü</option>
+                <option value="Devam Ediyor">Devam Ediyor</option>
+                <option value="Beklemede">Beklemede</option>
+                <option value="Tamamlandı">Tamamlandı</option>
               </select>
+              <label className="flex items-center space-x-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={sortByPriority}
+                  onChange={() => setSortByPriority(!sortByPriority)}
+                  className="rounded border-gray-300"
+                />
+                <span>Önceliğe Göre Sırala</span>
+              </label>
               <button
                 onClick={addNewTopic}
                 className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition shadow"
@@ -139,16 +146,16 @@ export default function Dashboard() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3"><input type="checkbox" className="rounded" /></th>
-                  {["No", "Başlık", "Durum", "Öncelik", "İşlemler"].map((h) => (
+                  {["No","Başlık","Durum","Öncelik","İşlemler"].map(h => (
                     <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y">
-                {filteredTopics.map((topic) => (
+                {list.map((topic, idx) => (
                   <tr key={topic.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4"><input type="checkbox" className="rounded" /></td>
-                    <td className="px-6 py-4">#{topic.id}</td>
+                    <td className="px-6 py-4">#{idx + 1}</td>
                     <td className="px-6 py-4 font-medium">{topic.title}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 rounded-full ${getStatusColor(topic.status)}`}>
@@ -181,7 +188,7 @@ export default function Dashboard() {
                     </td>
                   </tr>
                 ))}
-                {filteredTopics.length === 0 && (
+                {list.length === 0 && (
                   <tr>
                     <td colSpan="6" className="p-4 text-center text-gray-500">
                       Kayıt bulunamadı.
@@ -195,7 +202,7 @@ export default function Dashboard() {
           {/* Footer */}
           <div className="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
             <div className="text-sm text-gray-700">
-              Toplam <span className="font-medium">{filteredTopics.length}</span> konu gösteriliyor
+              Toplam <span className="font-medium">{list.length}</span> konu gösteriliyor
             </div>
             <div className="flex space-x-2">
               <button disabled className="px-3 py-1 text-sm text-gray-500 disabled:opacity-50">Önceki</button>
