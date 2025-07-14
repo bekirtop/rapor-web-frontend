@@ -1,0 +1,130 @@
+/* src/styles/AuthPage.css */
+
+.auth-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px); /* Navbar yüksekliği (64px) + üst/alt boşluk için ayar */
+  background-color: #f8f9fa;
+  padding: 2rem 1rem; /* Sayfayı küçük ekranlarda ezmesin */
+}
+
+.auth-form-card {
+  background-color: #ffffff;
+  padding: 2.5rem; /* Daha fazla padding */
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 480px; /* Daha geniş form */
+  text-align: center;
+  border: 1px solid #e9ecef; /* Hafif kenarlık */
+}
+
+.form-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #343a40;
+}
+
+.form-group {
+  margin-bottom: 1.2rem; /* Daha fazla boşluk */
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600; /* Daha kalın */
+  color: #495057;
+  margin-bottom: 0.6rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: -0.8rem; /* Hata mesajını yukarı çek */
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success-message {
+  color: #28a745;
+  font-size: 0.8rem;
+  margin-top: -0.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form-actions {
+  margin-top: 2rem;
+}
+
+.primary-button {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.primary-button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.primary-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.form-link-text {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.form-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.form-link:hover {
+  text-decoration: underline;
+}
+
+/* Küçük ekranlar için basit responsive ayarlar */
+@media (max-width: 600px) {
+  .auth-form-card {
+    margin: 0 1rem;
+    padding: 1.5rem;
+  }
+  .form-title {
+    font-size: 1.8rem;
+  }
+}
